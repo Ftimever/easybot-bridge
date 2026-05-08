@@ -1,8 +1,12 @@
 package com.springwater.easybot.bridge;
 
+import com.google.gson.JsonObject;
 import com.springwater.easybot.bridge.message.Segment;
 import com.springwater.easybot.bridge.model.PlayerInfo;
 import com.springwater.easybot.bridge.model.ServerInfo;
+import com.springwater.easybot.bridge.packet.NbtDataTypeEnum;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
 public interface BridgeBehavior {
@@ -16,5 +20,6 @@ public interface BridgeBehavior {
     boolean moduleIsInstalled(String moduleName);
     boolean moduleIsEnabled(String moduleName);
     boolean isAuthenticated(String playerName);
+    @Nullable JsonObject ReadNbtData(String playerUuid, NbtDataTypeEnum dataType);
     List<PlayerInfo> getPlayerList();
 }

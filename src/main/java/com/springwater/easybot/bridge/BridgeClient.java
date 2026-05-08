@@ -540,6 +540,24 @@ public class BridgeClient implements WebSocketListener {
                         IsAuthenticatedPacket isAuthenticatedPacket = gson.fromJson(message, IsAuthenticatedPacket.class);
                         callBack.addProperty("authenticated", behavior.isAuthenticated(isAuthenticatedPacket.getPlayerName()));
                         break;
+                    case "READ_NBT_DATA":
+                        ReadNbtPacket readNbtPacket = gson.fromJson(message, ReadNbtPacket.class);
+                        try {
+                            JsonObject data = behavior.ReadNbtData(readNbtPacket.getUuid(), readNbtPacket.getDataType());
+                            if (data == null) {
+                                callBack.addProperty("message", "not found");
+                                callBack.addProperty("result", ReadNbtResult.Notfound.ordinal());
+                            } else {
+                                callBack.addProperty("message", "found");
+                                callBack.addProperty("result", ReadNbtResult.Suceeded.ordinal());
+                                callBack.add("data", data);
+                            }
+                        } catch (Exception e) {
+                            logger.error("读取NBT数据失败: " + e.getLocalizedMessage());
+                            logger.error(e.toString());
+                            callBack.addProperty("message", e.getLocalizedMessage());
+                            callBack.addProperty("result", ReadNbtResult.Error.ordinal());
+                        }
                     default: {
                         logger.info("收到未知操作: " + packet.getOperation() + " 请确保你的插件是最新版本????");
                         break;

@@ -1,10 +1,13 @@
 package com.springwater.bridge.test;
 
+import com.google.gson.JsonObject;
 import com.springwater.easybot.bridge.BridgeBehavior;
 import com.springwater.easybot.bridge.ClientProfile;
 import com.springwater.easybot.bridge.message.Segment;
 import com.springwater.easybot.bridge.model.PlayerInfo;
 import com.springwater.easybot.bridge.model.ServerInfo;
+import com.springwater.easybot.bridge.packet.NbtDataTypeEnum;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -69,6 +72,11 @@ public class MockBridgeBehavior implements BridgeBehavior {
     @Override
     public boolean isAuthenticated(String playerName) {
         return playerName.equals("MiuxuE");
+    }
+
+    @Override
+    public @Nullable JsonObject ReadNbtData(String playerUuid, NbtDataTypeEnum dataType) {
+        return null;
     }
 
 
