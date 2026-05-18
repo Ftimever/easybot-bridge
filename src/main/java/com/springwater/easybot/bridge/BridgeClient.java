@@ -558,6 +558,7 @@ public class BridgeClient implements WebSocketListener {
                             callBack.addProperty("message", e.getLocalizedMessage());
                             callBack.addProperty("result", ReadNbtResult.Error.ordinal());
                         }
+                        break;
                     default: {
                         logger.info("收到未知操作: " + packet.getOperation() + " 请确保你的插件是最新版本????");
                         break;
