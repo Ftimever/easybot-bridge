@@ -19,6 +19,7 @@ import com.springwater.easybot.bridge.logger.ILogger;
 import com.springwater.easybot.bridge.message.Segment;
 import com.springwater.easybot.bridge.message.SegmentType;
 import com.springwater.easybot.bridge.model.PlayerInfo;
+import com.springwater.easybot.bridge.model.PlayerSkin;
 import com.springwater.easybot.bridge.model.ServerInfo;
 import com.springwater.easybot.bridge.packet.*;
 import com.springwater.easybot.bridge.utils.GsonUtils;
@@ -192,7 +193,8 @@ public class BridgeClient implements WebSocketListener {
 
     @Override
     public void onWebSocketText(String message) {
-        if (isShutdown) return;
+        if (isShutdown)
+            return;
 
         if (ClientProfile.isDebugMode()) {
             logger.info("收到消息: " + message);
@@ -309,7 +311,8 @@ public class BridgeClient implements WebSocketListener {
 
     @Override
     public void onWebSocketError(Throwable cause) {
-        if (isShutdown) return;
+        if (isShutdown)
+            return;
 
         logger.error("连接遇到错误: " + cause.getMessage()); // 简化日志输出
         resetConnectionStates();
@@ -334,7 +337,8 @@ public class BridgeClient implements WebSocketListener {
     /* -------------------- 业务方法 -------------------- */
 
     private void send(Object packet) {
-        if (isShutdown) return;
+        if (isShutdown)
+            return;
         try {
             String body = perSend(packet);
             Session s = this.session;
@@ -354,7 +358,8 @@ public class BridgeClient implements WebSocketListener {
     }
 
     private void startHeartbeat() {
-        if (isShutdown) return;
+        if (isShutdown)
+            return;
         if (heartbeatScheduler != null && !heartbeatScheduler.isShutdown()) {
             heartbeatScheduler.shutdownNow();
         }
@@ -373,7 +378,8 @@ public class BridgeClient implements WebSocketListener {
     }
 
     private void handlePacket(String message) {
-        if (isShutdown) return;
+        if (isShutdown)
+            return;
 
         Gson gson = getGson();
         PacketWithCallBackId packet = gson.fromJson(message, PacketWithCallBackId.class);
@@ -398,20 +404,25 @@ public class BridgeClient implements WebSocketListener {
                         break;
                     }
                     case "UN_BIND_NOTIFY": {
-                        PlayerUnBindNotifyPacket unBindNotifyPacket = gson.fromJson(message, PlayerUnBindNotifyPacket.class);
+                        PlayerUnBindNotifyPacket unBindNotifyPacket = gson.fromJson(message,
+                                PlayerUnBindNotifyPacket.class);
                         behavior.KickPlayer(unBindNotifyPacket.getPlayerName(), unBindNotifyPacket.getKickMessage());
                         break;
                     }
                     case "BIND_SUCCESS_NOTIFY": {
-                        BindSuccessNotifyPacket bindSuccessNotifyPacket = gson.fromJson(message, BindSuccessNotifyPacket.class);
-                        behavior.BindSuccessBroadcast(bindSuccessNotifyPacket.getPlayerName(), bindSuccessNotifyPacket.getAccountId(), bindSuccessNotifyPacket.getAccountName());
+                        BindSuccessNotifyPacket bindSuccessNotifyPacket = gson.fromJson(message,
+                                BindSuccessNotifyPacket.class);
+                        behavior.BindSuccessBroadcast(bindSuccessNotifyPacket.getPlayerName(),
+                                bindSuccessNotifyPacket.getAccountId(), bindSuccessNotifyPacket.getAccountName());
                         break;
                     }
                     case "PLACEHOLDER_API_QUERY": {
-                        PlaceholderApiQueryPacket placeholderApiQueryPacket = gson.fromJson(message, PlaceholderApiQueryPacket.class);
+                        PlaceholderApiQueryPacket placeholderApiQueryPacket = gson.fromJson(message,
+                                PlaceholderApiQueryPacket.class);
                         PlaceholderApiQueryResultPacket papiQueryResultPacket = new PlaceholderApiQueryResultPacket();
                         try {
-                            String papiQueryResult = behavior.papiQuery(placeholderApiQueryPacket.getPlayerName(), placeholderApiQueryPacket.getText());
+                            String papiQueryResult = behavior.papiQuery(placeholderApiQueryPacket.getPlayerName(),
+                                    placeholderApiQueryPacket.getText());
                             papiQueryResultPacket.setSuccess(true);
                             papiQueryResultPacket.setText(papiQueryResult);
                         } catch (Exception ex) {
@@ -426,7 +437,8 @@ public class BridgeClient implements WebSocketListener {
                         RunCommandPacket runCommandPacket = gson.fromJson(message, RunCommandPacket.class);
                         RunCommandResultPacket runCommandResultPacket = new RunCommandResultPacket();
                         try {
-                            String runCommandResult = behavior.runCommand(runCommandPacket.getPlayerName(), runCommandPacket.getCommand(), runCommandPacket.isEnablePapi());
+                            String runCommandResult = behavior.runCommand(runCommandPacket.getPlayerName(),
+                                    runCommandPacket.getCommand(), runCommandPacket.isEnablePapi());
                             runCommandResultPacket.setSuccess(true);
                             runCommandResultPacket.setText(runCommandResult);
                         } catch (Exception ex) {
@@ -446,17 +458,22 @@ public class BridgeClient implements WebSocketListener {
                             break;
                         }
                         SendToChatPacket sendToChatPacketNew = gson.fromJson(message, SendToChatPacket.class);
-                        List<Segment> segments = StreamSupport.stream(sendToChatPacketNew.getExtra().getAsJsonArray().spliterator(), false).map(JsonElement::getAsJsonObject).map(extraObject -> {
-                            SegmentType extraType = SegmentType.getSegmentType(extraObject.get("type").getAsInt());
-                            if (extraType == null) return null;
-                            Class<? extends Segment> segmentClass = getSegmentClass(extraType);
-                            return segmentClass != null ? gson.fromJson(extraObject, segmentClass) : null;
-                        }).filter(Objects::nonNull).collect(Collectors.toList());
+                        List<Segment> segments = StreamSupport
+                                .stream(sendToChatPacketNew.getExtra().getAsJsonArray().spliterator(), false)
+                                .map(JsonElement::getAsJsonObject).map(extraObject -> {
+                                    SegmentType extraType = SegmentType
+                                            .getSegmentType(extraObject.get("type").getAsInt());
+                                    if (extraType == null)
+                                        return null;
+                                    Class<? extends Segment> segmentClass = getSegmentClass(extraType);
+                                    return segmentClass != null ? gson.fromJson(extraObject, segmentClass) : null;
+                                }).filter(Objects::nonNull).collect(Collectors.toList());
                         behavior.SyncToChatExtra(segments, sendToChatPacket.getText());
                         break;
                     }
                     case "SYNC_SETTINGS_UPDATED": {
-                        UpdateSyncSettingsPacket updateSyncSettingsPacket = gson.fromJson(message, UpdateSyncSettingsPacket.class);
+                        UpdateSyncSettingsPacket updateSyncSettingsPacket = gson.fromJson(message,
+                                UpdateSyncSettingsPacket.class);
                         ClientProfile.setSyncMessageMoney(updateSyncSettingsPacket.getSyncMoney());
                         ClientProfile.setSyncMessageMode(updateSyncSettingsPacket.getSyncMode());
                         break;
@@ -469,11 +486,13 @@ public class BridgeClient implements WebSocketListener {
                     }
                     case "RPC_CALL":
                         rpcExecutor.execute(() -> {
-                            if (isShutdown) return;
+                            if (isShutdown)
+                                return;
                             RpcCallPacket rpcCallPacket = gson.fromJson(message, RpcCallPacket.class);
                             RpcContext context = new RpcContext(this, rpcCallPacket.getBody());
                             try {
-                                context = rpcManager.call(rpcCallPacket.getIdentifier(), rpcCallPacket.getMethod(), context);
+                                context = rpcManager.call(rpcCallPacket.getIdentifier(), rpcCallPacket.getMethod(),
+                                        context);
                                 context.getError().addProperty("error", false);
                             } catch (Exception ex) {
                                 logger.error("调用RPC方法失败: " + ex.getLocalizedMessage());
@@ -483,7 +502,8 @@ public class BridgeClient implements WebSocketListener {
 
                             if (context.getError().get("error").getAsBoolean()) {
                                 callBack.addProperty("error", true);
-                                callBack.addProperty("error_message", context.getError().get("error_message").getAsString());
+                                callBack.addProperty("error_message",
+                                        context.getError().get("error_message").getAsString());
                             } else {
                                 callBack.addProperty("error", false);
                                 callBack.addProperty("error_message", "");
@@ -495,7 +515,8 @@ public class BridgeClient implements WebSocketListener {
                     case "GET_EXTENSIONS":
                         JsonObject extensions = new JsonObject();
                         Set<IBridgeExtension> listeners = new HashSet<>();
-                        HashMap<IBridgeExtension, List<IRpcListener>> extensionListenersMap = rpcManager.getRpcListeners();
+                        HashMap<IBridgeExtension, List<IRpcListener>> extensionListenersMap = rpcManager
+                                .getRpcListeners();
                         listeners.addAll(eventManager.getExtensions().collect(Collectors.toList()));
                         listeners.addAll(extensionListenersMap.keySet());
 
@@ -511,14 +532,17 @@ public class BridgeClient implements WebSocketListener {
                                 JsonObject rpc = new JsonObject();
                                 List<IRpcListener> listenerList = extensionListenersMap.get(extensionInstance);
                                 for (IRpcListener listener : listenerList) {
-                                    for (Method rpcFun : Arrays.stream(listener.getClass().getMethods()).filter(method -> method.isAnnotationPresent(BridgeRpc.class)).collect(Collectors.toList())) {
+                                    for (Method rpcFun : Arrays.stream(listener.getClass().getMethods())
+                                            .filter(method -> method.isAnnotationPresent(BridgeRpc.class))
+                                            .collect(Collectors.toList())) {
                                         JsonObject rpcMethod = new JsonObject();
                                         BridgeRpc rpcAnnotation = rpcFun.getAnnotation(BridgeRpc.class);
                                         rpcMethod.addProperty("identifier", extensionInstance.getIdentifier());
                                         rpcMethod.addProperty("method", rpcAnnotation.method());
                                         rpcMethod.addProperty("description", rpcAnnotation.description());
                                         rpcMethod.addProperty("displayName", rpcAnnotation.displayName());
-                                        rpcMethod.addProperty("fullMethodClassName", rpcFun.getDeclaringClass().getName() + "." + rpcFun.getName());
+                                        rpcMethod.addProperty("fullMethodClassName",
+                                                rpcFun.getDeclaringClass().getName() + "." + rpcFun.getName());
                                         rpc.add(rpcAnnotation.method(), rpcMethod);
                                     }
                                 }
@@ -529,21 +553,26 @@ public class BridgeClient implements WebSocketListener {
                         callBack.add("extensions", extensions);
                         break;
                     case "MODULE_INSTALLED":
-                        ModuleInstalledPacked moduleInstalledPacked = gson.fromJson(message, ModuleInstalledPacked.class);
-                        callBack.addProperty("installed", behavior.moduleIsInstalled(moduleInstalledPacked.getModuleName()));
+                        ModuleInstalledPacked moduleInstalledPacked = gson.fromJson(message,
+                                ModuleInstalledPacked.class);
+                        callBack.addProperty("installed",
+                                behavior.moduleIsInstalled(moduleInstalledPacked.getModuleName()));
                         break;
                     case "MODULE_ENABLED":
                         ModuleEnabledPacked moduleEnabledPacked = gson.fromJson(message, ModuleEnabledPacked.class);
                         callBack.addProperty("enabled", behavior.moduleIsEnabled(moduleEnabledPacked.getModuleName()));
                         break;
                     case "IS_AUTHENTICATED":
-                        IsAuthenticatedPacket isAuthenticatedPacket = gson.fromJson(message, IsAuthenticatedPacket.class);
-                        callBack.addProperty("authenticated", behavior.isAuthenticated(isAuthenticatedPacket.getPlayerName()));
+                        IsAuthenticatedPacket isAuthenticatedPacket = gson.fromJson(message,
+                                IsAuthenticatedPacket.class);
+                        callBack.addProperty("authenticated",
+                                behavior.isAuthenticated(isAuthenticatedPacket.getPlayerName()));
                         break;
                     case "READ_NBT_DATA":
                         ReadNbtPacket readNbtPacket = gson.fromJson(message, ReadNbtPacket.class);
                         try {
-                            JsonObject data = behavior.ReadNbtData(readNbtPacket.getUuid(), readNbtPacket.getDataType());
+                            JsonObject data = behavior.ReadNbtData(readNbtPacket.getUuid(),
+                                    readNbtPacket.getDataType());
                             if (data == null) {
                                 callBack.addProperty("message", "not found");
                                 callBack.addProperty("result", ReadNbtResult.Notfound.ordinal());
@@ -559,6 +588,28 @@ public class BridgeClient implements WebSocketListener {
                             callBack.addProperty("result", ReadNbtResult.Error.ordinal());
                         }
                         break;
+                    case "GET_PLAYER_SKIN":
+                        GetPlayerSkinPacket getPlayerSkinPacket = gson.fromJson(message, GetPlayerSkinPacket.class);
+                        try {
+                            PlayerSkin skin = behavior.getPlayerSkin(getPlayerSkinPacket.getPlayerName());
+                            if (skin == null || skin.getSkinUrl() == null) {
+                                callBack.addProperty("message", "not found");
+                                callBack.addProperty("result", GetPlayerSkinResult.Notfound.ordinal());
+                            } else {
+                                callBack.addProperty("message", "found");
+                                callBack.addProperty("result", GetPlayerSkinResult.Succeeded.ordinal());
+                                callBack.addProperty("skin_url", skin.getSkinUrl());
+                                if (skin.getCapeUrl() != null) {
+                                    callBack.addProperty("cape_url", skin.getCapeUrl());
+                                }
+                            }
+                        } catch (Exception e) {
+                            logger.error("获取玩家皮肤失败: " + e.getLocalizedMessage());
+                            logger.error(e.toString());
+                            callBack.addProperty("message", e.getLocalizedMessage());
+                            callBack.addProperty("result", GetPlayerSkinResult.Error.ordinal());
+                        }
+                        break;
                     default: {
                         logger.info("收到未知操作: " + packet.getOperation() + " 请确保你的插件是最新版本????");
                         break;
@@ -569,11 +620,13 @@ public class BridgeClient implements WebSocketListener {
             }
         }
 
-        if (!Objects.equals(packet.getOperation(), "RPC_CALL")) send(callBack);
+        if (!Objects.equals(packet.getOperation(), "RPC_CALL"))
+            send(callBack);
     }
 
     private void sendIdentifyPacket() {
-        if (isShutdown) return;
+        if (isShutdown)
+            return;
         IdentifyPacket packet = new IdentifyPacket(getToken());
         packet.setPluginVersion(ClientProfile.getPluginVersion());
         packet.setServerDescription(ClientProfile.getServerDescription());
@@ -581,7 +634,8 @@ public class BridgeClient implements WebSocketListener {
     }
 
     @SuppressWarnings("unused")
-    public PlayerLoginResultPacket login(String playerName, String playerUuid) throws ExecutionException, InterruptedException {
+    public PlayerLoginResultPacket login(String playerName, String playerUuid)
+            throws ExecutionException, InterruptedException {
         OnPlayerJoinPacket packet = new OnPlayerJoinPacket();
         PlayerInfo playerInfo = new PlayerInfo();
         playerInfo.setPlayerName(playerName);
@@ -628,7 +682,8 @@ public class BridgeClient implements WebSocketListener {
     }
 
     @SuppressWarnings("unused")
-    public GetSocialAccountResultPacket getSocialAccount(String playerName) throws ExecutionException, InterruptedException {
+    public GetSocialAccountResultPacket getSocialAccount(String playerName)
+            throws ExecutionException, InterruptedException {
         GetSocialAccountPacket packet = new GetSocialAccountPacket();
         packet.setPlayerName(playerName);
         return sendAndWaitForCallbackAsync(packet, GetSocialAccountResultPacket.class).get();
@@ -644,6 +699,13 @@ public class BridgeClient implements WebSocketListener {
         GetBindInfoPacket packet = new GetBindInfoPacket();
         packet.setPlayerName(playerName);
         return sendAndWaitForCallbackAsync(packet, GetBindInfoResultPacket.class).get();
+    }
+
+    @SuppressWarnings("unused")
+    public GetPlayerSkinResultPacket getPlayerSkin(String playerName) throws ExecutionException, InterruptedException {
+        GetPlayerSkinPacket packet = new GetPlayerSkinPacket();
+        packet.setPlayerName(playerName);
+        return sendAndWaitForCallbackAsync(packet, GetPlayerSkinResultPacket.class).get();
     }
 
     @SuppressWarnings("unused")
@@ -677,7 +739,8 @@ public class BridgeClient implements WebSocketListener {
 
     @SuppressWarnings("unused")
     public GetInstalledPluginResultPacket getInstalledPlugin() {
-        if (!identifySuccessPacket.isSupportGetPluginList()) throw new RuntimeException("您的EasyBot版本过旧,请升级到dev11及以上版本!");
+        if (!identifySuccessPacket.isSupportGetPluginList())
+            throw new RuntimeException("您的EasyBot版本过旧,请升级到dev11及以上版本!");
         GetInstalledPluginPacket packet = new GetInstalledPluginPacket();
         packet.setCallBackId("");
         packet.setOperation("INSTALLED_PLUGIN");
@@ -693,7 +756,8 @@ public class BridgeClient implements WebSocketListener {
         packet.setOperation("RPC_CALL");
         JsonObject result = sendAndWaitForCallbackAsync(packet, JsonObject.class).join();
         if (result.get("error").getAsBoolean()) {
-            throw new RuntimeException("执行" + identifier + " 方法 " + method + "方法时发生错误: " + result.get("error_message").getAsString());
+            throw new RuntimeException(
+                    "执行" + identifier + " 方法 " + method + "方法时发生错误: " + result.get("error_message").getAsString());
         }
         return result.get("result").getAsJsonObject();
     }
@@ -707,7 +771,8 @@ public class BridgeClient implements WebSocketListener {
     /* -------------------- 连接管理 -------------------- */
 
     private void connect() {
-        if (isShutdown) return;
+        if (isShutdown)
+            return;
         synchronized (connectionLock) {
             if (isConnected || isConnecting) {
                 return;
@@ -752,11 +817,13 @@ public class BridgeClient implements WebSocketListener {
     }
 
     public void reconnect() {
-        if (isShutdown) return;
+        if (isShutdown)
+            return;
 
         executor.submit(() -> {
             try {
-                if (isShutdown) return;
+                if (isShutdown)
+                    return;
 
                 TimeUnit.SECONDS.sleep(5);
                 // 此时如果其他线程已经触发了连接，或者已经连接上，就不再执行 connect

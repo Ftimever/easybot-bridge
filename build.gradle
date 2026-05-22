@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.springwater.easybot'
-version = '1.7.3'
+version = '1.7.4'
 
 repositories {
     mavenCentral()
@@ -22,8 +22,8 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 
 
-    compileOnly 'org.projectlombok:lombok:1.18.32'
-    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+    compileOnly 'org.projectlombok:lombok:1.18.46'
+    annotationProcessor 'org.projectlombok:lombok:1.18.46'
 }
 
 test {

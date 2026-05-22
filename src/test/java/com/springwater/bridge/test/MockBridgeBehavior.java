@@ -1,15 +1,20 @@
 package com.springwater.bridge.test;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+
+import org.jetbrains.annotations.Nullable;
+
 import com.google.gson.JsonObject;
 import com.springwater.easybot.bridge.BridgeBehavior;
 import com.springwater.easybot.bridge.ClientProfile;
 import com.springwater.easybot.bridge.message.Segment;
 import com.springwater.easybot.bridge.model.PlayerInfo;
+import com.springwater.easybot.bridge.model.PlayerSkin;
 import com.springwater.easybot.bridge.model.ServerInfo;
 import com.springwater.easybot.bridge.packet.NbtDataTypeEnum;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
 
 public class MockBridgeBehavior implements BridgeBehavior {
 
@@ -78,7 +83,6 @@ public class MockBridgeBehavior implements BridgeBehavior {
     public @Nullable JsonObject ReadNbtData(String playerUuid, NbtDataTypeEnum dataType) {
         return null;
     }
-
 
     private static final String[] PREDEFINED_SKINS = {
             "https://skin.mclists.cn/skin/skins/dea93d900f05d46a4f471241f4258d3b09e1015bbeb0c051972dd42a4ff8b294.png",
@@ -225,5 +229,23 @@ public class MockBridgeBehavior implements BridgeBehavior {
         }
 
         return mockList;
+    }
+
+    @Override
+    public @Nullable PlayerSkin getPlayerSkin(String playerName) {
+        switch (playerName) {
+            case "MiuxuE":
+                PlayerSkin skin = new PlayerSkin();
+                skin.setSkinUrl("https://littleskin.cn/raw/767644");
+                skin.setCapeUrl("https://littleskin.cn/raw/746271");
+                return skin;
+            case "TestPlayer":
+                PlayerSkin skin2 = new PlayerSkin();
+                skin2.setSkinUrl("https://littleskin.cn/raw/76714");
+                return skin2;
+            default:
+                return null;
+        }
+
     }
 }
