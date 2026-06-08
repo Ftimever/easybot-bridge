@@ -2,8 +2,7 @@ name: Gradle Package
 
 on:
   release:
-    types: [ created ]
-  # 这里的 workflow_dispatch 允许手动点击按钮触发
+    types: [created]
   workflow_dispatch:
     inputs:
       skip_publish:
@@ -32,17 +31,28 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-        
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build with Gradle
         run: ./gradlew build
-      
-      # 这一步的if 作用是检测是否是发布事件，或者手动触发的 手动触发不发布版本
+
+      # GitHub Packages 发布
       - name: Publish to GitHub Packages
         if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.skip_publish == false) }}
         run: ./gradlew publish
         env:
           USERNAME: ${{ github.actor }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # JitPack 主动触发构建
+      - name: Trigger JitPack build
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          curl -X POST https://jitpack.io/api/builds \
+            -H "Content-Type: application/json" \
+            -d '{
+              "gitRepoUrl": "https://github.com/${{ github.repository }}.git",
+              "ref": "${{ github.ref_name }}"
+            }'
