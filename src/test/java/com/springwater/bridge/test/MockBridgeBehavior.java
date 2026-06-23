@@ -248,4 +248,9 @@ public class MockBridgeBehavior implements BridgeBehavior {
         }
 
     }
+    
+    @Override
+    public void onCrossBindNotify(String playerName, String code, String targetPlatform, String originPlatform) {
+        
+    }
 }

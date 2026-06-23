@@ -416,6 +416,14 @@ public class BridgeClient implements WebSocketListener {
                                 bindSuccessNotifyPacket.getAccountId(), bindSuccessNotifyPacket.getAccountName());
                         break;
                     }
+                    case "CROSS_BIND_NOTIFY": {
+                        CrossBindNotifyPacket crossBindNotifyPacket = gson.fromJson(message,
+                                CrossBindNotifyPacket.class);
+                        behavior.onCrossBindNotify(crossBindNotifyPacket.getPlayerName(),
+                                crossBindNotifyPacket.getCode(), crossBindNotifyPacket.getTargetPlatform(),
+                                crossBindNotifyPacket.getOriginPlatform());
+                        break;
+                    }
                     case "PLACEHOLDER_API_QUERY": {
                         PlaceholderApiQueryPacket placeholderApiQueryPacket = gson.fromJson(message,
                                 PlaceholderApiQueryPacket.class);
@@ -687,6 +695,48 @@ public class BridgeClient implements WebSocketListener {
         GetSocialAccountPacket packet = new GetSocialAccountPacket();
         packet.setPlayerName(playerName);
         return sendAndWaitForCallbackAsync(packet, GetSocialAccountResultPacket.class).get();
+    }
+
+    /**
+     * 确认跨平台绑定
+     * <p>
+     * 向 EasyBot 服务端发送 CONFIRM_BIND 请求，确认跨平台绑定操作。
+     * 使用同步方式等待回调响应，超时时间为 5 秒。
+     * </p>
+     *
+     * @param playerName 玩家游戏名
+     * @param code       跨平台绑定确认码
+     * @return 确认绑定结果包，包含 success、message 和 boundPlatforms 字段
+     * @throws ExecutionException   如果回调处理过程中发生异常
+     * @throws InterruptedException 如果等待过程中被中断
+     */
+    @SuppressWarnings("unused")
+    public ConfirmBindResultPacket confirmBind(String playerName, String code)
+            throws ExecutionException, InterruptedException {
+        ConfirmBindPacket packet = new ConfirmBindPacket();
+        packet.setPlayerName(playerName);
+        packet.setCode(code);
+        return sendAndWaitForCallbackAsync(packet, ConfirmBindResultPacket.class).get();
+    }
+
+    /**
+     * 查询玩家绑定状态
+     * <p>
+     * 向 EasyBot 服务端发送 QUERY_BIND_STATUS 请求，查询指定玩家的跨平台绑定状态。
+     * 使用同步方式等待回调响应，超时时间为 5 秒。
+     * </p>
+     *
+     * @param playerName 要查询的玩家游戏名
+     * @return 查询绑定状态结果包，包含 isBound 和 socialAccounts 字段
+     * @throws ExecutionException   如果回调处理过程中发生异常
+     * @throws InterruptedException 如果等待过程中被中断
+     */
+    @SuppressWarnings("unused")
+    public QueryBindStatusResultPacket queryBindStatus(String playerName)
+            throws ExecutionException, InterruptedException {
+        QueryBindStatusPacket packet = new QueryBindStatusPacket();
+        packet.setPlayerName(playerName);
+        return sendAndWaitForCallbackAsync(packet, QueryBindStatusResultPacket.class).get();
     }
 
     @SuppressWarnings("unused")

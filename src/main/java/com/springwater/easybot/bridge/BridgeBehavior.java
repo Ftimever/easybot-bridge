@@ -39,5 +39,7 @@ public interface BridgeBehavior {
 
     @Nullable
     PlayerSkin getPlayerSkin(String playerName);
+    
+    void onCrossBindNotify(String playerName, String code, String targetPlatform, String originPlatform);
 
 }
